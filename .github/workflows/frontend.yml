@@ -49,4 +49,4 @@ jobs:
 
     - name: Push to S3
       run: |
-        aws s3 sync ./packages/frontend/dist/ s3://$BUCKET/
+        aws s3 sync ./packages/frontend/dist/ s3://${{ secrets.AWS_S3_BUCKET_NAME }}/
