@@ -9,7 +9,7 @@ on:
 
 env:
   KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  ACCESS_KEY: ${{ secret.AWS_SECRET_ACCESS_KEY }}
+  ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   REGION: ${{ secrets.AWS_REGION }}
   FILES_BUCKET: ${{ secrets.AWS_FILES_BUCKET_NAME }}
   BUCKET: ${{ secrets.AWS_S3_BUCKET_NAME }}
