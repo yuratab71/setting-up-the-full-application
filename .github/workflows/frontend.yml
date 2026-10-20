@@ -51,9 +51,9 @@ jobs:
     - name: Configure AWS
       uses: aws-actions/configure-aws-credentials@v1
       with:
-        aws-access-key-id: $KEY_ID
-        aws-secret-access-key: $ACCESS_KEY
-        aws-region: $REGION
+        aws-access-key-id: "$KEY_ID"
+        aws-secret-access-key: "$ACCESS_KEY"
+        aws-region: ${{ secrets.AWS_REGION }} 
 
     - name: Push to S3
       run: |
