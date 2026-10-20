@@ -8,14 +8,6 @@ on:
       - '**'
 
 env:
-  KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  REGION: ${{ secrets.AWS_REGION }}
-  FILES_BUCKET: ${{ secrets.AWS_FILES_BUCKET_NAME }}
-  BUCKET: ${{ secrets.AWS_S3_BUCKET_NAME }}
-  GATEWAY_URL: ${{ secrets.AWS_GATEWAY_URL }}
-  IDENTITY_POOL_ID: ${{ secrets.AWS_IDENTITY_POOL_ID }}
-  CLOUDFRONT_ID: ${{ secrets.AWS_CLOUDFRONT_ID }}
   ENV_PATH: "./packages/frontend/.env"
 
 jobs:
@@ -38,11 +30,11 @@ jobs:
     - name: Populate env
       run: |
         touch "$ENV_PATH"
-        echo VITE_FILES_BUCKET="$FILES_BUCKET" >> "$ENV_PATH"
-        echo VITE_GATEWAY_URL="$GATEWAY_URL" >> "$ENV_PATH"
-        echo VITE_IDENTITY_POOL_ID="$IDENTITY_POOL_ID" >> "$ENV_PATH"
-        echo VITE_REGION="$REGION" >> "$ENV_PATH"
-        echo VITE_BASE_URL="/cloudfront/$CLOUDFRONT_ID" >> "$ENV_PATH"
+        echo VITE_FILES_BUCKET=${{ secrets.AWS_FILES_BUCKET_NAME }}>> "$ENV_PATH"
+        echo VITE_GATEWAY_URL=${{ secrets.AWS_GATEWAY_URL }} >> "$ENV_PATH"
+        echo VITE_IDENTITY_POOL_ID=${{ secrets.AWS_IDENTITY_POOL_ID }} >> "$ENV_PATH"
+        echo VITE_REGION=${{ secrets.AWS_REGION }} >> "$ENV_PATH"
+        echo VITE_BASE_URL="/cloudfront/${{ secrets.AWS_CLOUDFRONT_ID }}" >> "$ENV_PATH"
         cat "$ENV_PATH"
 
     - name: Build assets
@@ -51,8 +43,8 @@ jobs:
     - name: Configure AWS
       uses: aws-actions/configure-aws-credentials@v1
       with:
-        aws-access-key-id: "$KEY_ID"
-        aws-secret-access-key: "$ACCESS_KEY"
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }} 
 
     - name: Push to S3
