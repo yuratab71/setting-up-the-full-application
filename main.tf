@@ -48,8 +48,6 @@ module "lambda_list" {
   dynamodb_arn   = module.dynamodb.table_arn
   table_name     = module.dynamodb.table_name
   region         = local.region
-
-  depends_on = [module.network, module.dynamodb]
 }
 
 module "lambda_create" {
@@ -65,8 +63,6 @@ module "lambda_create" {
   dynamodb_arn   = module.dynamodb.table_arn
   table_name     = module.dynamodb.table_name
   region         = local.region
-
-  depends_on = [module.network, module.dynamodb]
 }
 
 module "lambda_get" {
@@ -82,8 +78,6 @@ module "lambda_get" {
   dynamodb_arn   = module.dynamodb.table_arn
   table_name     = module.dynamodb.table_name
   region         = local.region
-
-  depends_on = [module.network, module.dynamodb]
 }
 
 module "lambda_update" {
@@ -99,8 +93,6 @@ module "lambda_update" {
   dynamodb_arn   = module.dynamodb.table_arn
   table_name     = module.dynamodb.table_name
   region         = local.region
-
-  depends_on = [module.network, module.dynamodb]
 }
 
 module "lambda_delete" {
@@ -116,8 +108,6 @@ module "lambda_delete" {
   dynamodb_arn   = module.dynamodb.table_arn
   table_name     = module.dynamodb.table_name
   region         = local.region
-
-  depends_on = [module.network, module.dynamodb]
 }
 
 resource "aws_api_gateway_deployment" "this" {
@@ -127,6 +117,8 @@ resource "aws_api_gateway_deployment" "this" {
     redeployment = sha1(jsonencode([
       module.network.list_resource_id,
       module.network.id_resource_id,
+      module.network.options_method_id,
+      module.network.options_integration_id,
       module.lambda_list.method_id,
       module.lambda_list.integration_id,
       module.lambda_create.method_id,
@@ -171,13 +163,49 @@ module "frontend" {
   depends_on = [module.network, module.dynamodb, module.lambda_create, module.lambda_delete, module.lambda_get, module.lambda_list, module.lambda_update]
 }
 
-output "rest_api_url" {
-  type  = string
-  value = aws_api_gateway_stage.this.invoke_url
-}
-
 output "nameservers" {
   type        = list(string)
   description = "Hosted zone nameservers"
   value       = module.network.nameservers
 }
+
+output "files_bucket" {
+  type        = string
+  description = "VITE_FILES_BUCKET"
+  value       = module.frontend.files_bucket
+}
+
+output "gateway_url" {
+  type  = string
+  value = aws_api_gateway_stage.this.invoke_url
+}
+
+output "identity_pool_id" {
+  type        = string
+  description = "VITE_IDENTITY_POOL_ID"
+  value       = module.frontend.identity_pool_id
+}
+
+output "region" {
+  type        = string
+  description = "VITE_REGION"
+  value       = local.region
+}
+
+output "base_url" {
+  type        = string
+  description = "VITE_BASE_URL"
+  value       = "\\cloudfront\\${module.frontend.cloudfront_id}"
+}
+
+output "cloudfront_distribution_id" {
+  type  = string
+  value = module.frontend.cloudfront_id
+}
+
+output "frontend_bucket" {
+  type  = string
+  value = module.frontend.bucket
+}
+
+

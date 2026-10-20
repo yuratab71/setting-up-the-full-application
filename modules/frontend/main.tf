@@ -182,6 +182,7 @@ resource "local_file" "env" {
   VITE_GATEWAY_URL="${var.gw_url}/"
   VITE_IDENTITY_POOL_ID=${aws_cognito_identity_pool.this.id}
   VITE_REGION=${var.region}
+  VITE_BASE_URL=/cloudfront/${aws_cloudfront_distribution.this.id}
   EOT
 }
 

@@ -22,3 +22,15 @@ output "id_resource_id" {
   type  = string
   value = aws_api_gateway_resource.id.id
 }
+
+output "options_method_id" {
+  type  = string
+  value = aws_api_gateway_method.options.id
+}
+
+output "options_integration_id" {
+  type  = string
+  value = aws_api_gateway_integration.options.id
+}
+
+

@@ -3,6 +3,11 @@ output "files_bucket" {
   value = aws_s3_bucket.files.bucket
 }
 
+output "bucket" {
+  type  = string
+  value = aws_s3_bucket.this.bucket
+}
+
 output "identity_pool_id" {
   type  = string
   value = aws_cognito_identity_pool.this.id
