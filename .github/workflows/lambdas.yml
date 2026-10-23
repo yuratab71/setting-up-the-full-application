@@ -18,6 +18,9 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v6
 
+    - name: Debug git log
+      run: git log -q
+
     - name: Detect changed code
       id: lambdas
       shell: bash
