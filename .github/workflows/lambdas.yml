@@ -22,7 +22,7 @@ jobs:
       id: lambdas
       shell: bash
       run: |
-       FILES=$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}") \
+       FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }}) \
 
        LAMBDAS=$(echo "$FILES" \
             | grep '^backend/src' \
