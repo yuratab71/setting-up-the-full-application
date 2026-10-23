@@ -1,0 +1,59 @@
+name: Deploy Lambdas
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v6
+
+    - name: Setup NodeJS
+      uses: actions/setup-node@v6
+      with:
+        node-version: "24"
+
+    - name: Install dependencies
+      run: yarn install
+
+    - name: Build assets
+      run: yarn build:backend
+
+    - name: Configure AWS
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }} 
+
+    - name: Deploy Create Note lambda
+      run: |
+        zip -j ./createNote.js.zip ./packages/backend/dist/createNote/app.js
+        aws lambda update-function-code --function-name lambda-create --zip-file fileb://createNote.js.zip
+
+    - name: Deploy Delet Note lambda
+      run: |
+        zip -j ./deleteNote.js.zip ./packages/backend/dist/deleteNote/app.js
+        aws lambda update-function-code --function-name lambda-delete --zip-file fileb://deleteNote.js.zip
+
+    - name: Deploy Get Note lambda
+      run: |
+        zip -j ./getNote.js.zip ./packages/backend/dist/getNote/app.js
+        aws lambda update-function-code --function-name lambda-get --zip-file fileb://getNote.js.zip
+
+    - name: Deploy List Note lambda
+      run: |
+        zip -j ./listNotes.js.zip ./packages/backend/dist/listNotes/app.js
+        aws lambda update-function-code --function-name lambda-list --zip-file fileb://listNotes.js.zip
+
+    - name: Deploy Update Note lambda
+      run: |
+        zip -j ./updateNote.js.zip ./packages/backend/dist/updateNote/app.js
+        aws lambda update-function-code --function-name lambda-update --zip-file fileb://updateNote.js.zip
+
+ 

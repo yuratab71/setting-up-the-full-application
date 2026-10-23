@@ -7,7 +7,7 @@ const getOrigin = () => {
 }
 
 
-export const GATEWAY_URL = `${getOrigin()}/restapis/${import.meta.env.VITE_GATEWAY_ID}/prod/_user_request_/`;
+export const GATEWAY_URL = import.meta.env.VITE_GATEWAY_URL
 export const  MAX_FILE_SIZE = 500000;
 export const  FILES_BUCKET = import.meta.env.VITE_FILES_BUCKET;
 export const REGION = import.meta.env.VITE_REGION;
