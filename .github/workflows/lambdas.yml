@@ -51,8 +51,8 @@ jobs:
 
     - name: Deploy List Note lambda
       run: |
-        zip -r ./listNote.js.zip ./packages/backend/dist/listNote/app.js
-        aws lambda update-function-code --function-name lambda-list --zip-file fileb://listNote.js.zip
+        zip -r ./listNotes.js.zip ./packages/backend/dist/listNotes/app.js
+        aws lambda update-function-code --function-name lambda-list --zip-file fileb://listNotes.js.zip
 
     - name: Deploy Update Note lambda
       run: |
