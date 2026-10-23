@@ -33,27 +33,27 @@ jobs:
 
     - name: Deploy Create Note lambda
       run: |
-        zip -r ./createNote.js.zip ./packages/backend/dist/createNote/app.js
+        zip ./createNote.js.zip ./packages/backend/dist/createNote/app.js
         aws lambda update-function-code --function-name lambda-create --zip-file fileb://createNote.js.zip
 
     - name: Deploy Delet Note lambda
       run: |
-        zip -r ./deleteNote.js.zip ./packages/backend/dist/deleteNote/app.js
+        zip ./deleteNote.js.zip ./packages/backend/dist/deleteNote/app.js
         aws lambda update-function-code --function-name lambda-delete --zip-file fileb://deleteNote.js.zip
 
     - name: Deploy Get Note lambda
       run: |
-        zip -r ./getNote.js.zip ./packages/backend/dist/getNote/app.js
+        zip ./getNote.js.zip ./packages/backend/dist/getNote/app.js
         aws lambda update-function-code --function-name lambda-get --zip-file fileb://getNote.js.zip
 
     - name: Deploy List Note lambda
       run: |
-        zip -r ./listNotes.js.zip ./packages/backend/dist/listNotes/app.js
+        zip ./listNotes.js.zip ./packages/backend/dist/listNotes/app.js
         aws lambda update-function-code --function-name lambda-list --zip-file fileb://listNotes.js.zip
 
     - name: Deploy Update Note lambda
       run: |
-        zip -r ./updateNote.js.zip ./packages/backend/dist/updateNote/app.js
+        zip ./updateNote.js.zip ./packages/backend/dist/updateNote/app.js
         aws lambda update-function-code --function-name lambda-update --zip-file fileb://updateNote.js.zip
 
  
