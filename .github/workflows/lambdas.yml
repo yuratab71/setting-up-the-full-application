@@ -22,15 +22,17 @@ jobs:
       id: lambdas
       shell: bash
       run: |
-       FILES=$(git diff --name-only \
-            "${{ github.event.before }}" "${{ github.sha }}")
-            LAMBDAS=$(echo "$FILES" \
+       FILES=$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}") \
+
+       LAMBDAS=$(echo "$FILES" \
             | grep '^backend/src' \
             | cut -d '/' -f 2 \
             | sort -u \
             | jq -R -s -c 'split("\n") | map(select(length > 0))')
 
-          echo "lambdas=$LAMBDAS" >> "$GITHUB_OUTPUT"
+       echo "lambdas=$LAMBDAS" >> "$GITHUB_OUTPUT" \
+
+       echo "Changed Lambdas: $LA"
 
   deploy:
     runs-on: ubuntu-latest
