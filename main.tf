@@ -208,4 +208,7 @@ output "frontend_bucket" {
   value = module.frontend.bucket
 }
 
-
+output "lambdas_arns" {
+  type  = list(string)
+  value = [module.lambda_list.arn, module.lambda_create.arn, module.lambda_get.arn, module.lambda_update.arn, module.lambda_delete.arn]
+}

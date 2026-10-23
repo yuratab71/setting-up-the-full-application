@@ -1,0 +1,61 @@
+name: Deploy Lambdas
+
+on:
+  push:
+    branches:
+      # - main // for testing
+      - '*'
+      - '*/*'
+      - '**'
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      lambdas: ${{ steps.lambdas.outputs.lambdas }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v6
+
+    - name: Detect changed code
+      id: lambdas
+      shell: bash
+      run: |
+       FILES=$(git diff --name-only \
+            "${{ github.event.before }}" "${{ github.sha }}")
+            LAMBDAS=$(echo "$FILES" \
+            | grep '^backend/src' \
+            | cut -d '/' -f 2 \
+            | sort -u \
+            | jq -R -s -c 'split("\n") | map(select(length > 0))')
+
+          echo "lambdas=$LAMBDAS" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: prepare
+    if: needs.prepare.outputs.lambdas != '[]'
+    
+    strategy:
+      matrix:
+        lambda: ${{ fromJSON(needs.prepare.outputs.lambdas) }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - name: Install dependencies
+        run: yarn install
+        shell: bash
+
+      - name: Build assets
+        run: yarn build:backend
+
+
+      
