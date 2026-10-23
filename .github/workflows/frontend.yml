@@ -3,10 +3,7 @@ name: Deploy Frontend
 on:
   push:
     branches:
-      # - main // for testing
-      - '*'
-      - '*/*'
-      - '**'
+       - main 
 
 env:
   ENV_PATH: "./packages/frontend/.env"
