@@ -37,6 +37,6 @@ jobs:
     - name: Deploy Create Note lambda
       run: |
         zip -r ./createNote.js.zip ./packages/backend/dist/createNote/app.js
-        aws lambda update-function-code --function-name lambda-create --zip-file fileb://${GITHUB_WORKSPACE}/packages/backend/dist/createNote/app.js.zip
+        aws lambda update-function-code --function-name lambda-create --zip-file fileb://createNote.js.zip
 
      
