@@ -2,11 +2,8 @@ name: Deploy Lambdas
 
 on:
   push:
-    branches:
-      # - main // for testing
-      - '*'
-      - '*/*'
-      - '**'
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
   prepare:
