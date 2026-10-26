@@ -1,3 +1,10 @@
+# Local .terraform directories
+.terraform/
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+*.terraform.*
 
 # Created by https://www.gitignore.io/api/osx,node,linux,windows
 
@@ -75,6 +82,7 @@ typings/
 
 # dotenv environment variables file
 .env
+.env.*
 
 
 ### OSX ###
