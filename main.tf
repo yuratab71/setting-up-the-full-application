@@ -23,12 +23,34 @@ locals {
 }
 
 module "network" {
-  source = "./modules/network"
-  domain = local.domain
+  source  = "./modules/network"
+  domain  = local.domain
+  region  = local.region
+  sns_arn = module.dashboard.sns_arn
+
+  redeployment = sha1(jsonencode([
+    module.network.list_resource_id,
+    module.network.id_resource_id,
+    module.network.options_method_id,
+    module.network.options_integration_id,
+    module.lambda_list.method_id,
+    module.lambda_list.integration_id,
+    module.lambda_create.method_id,
+    module.lambda_create.integration_id,
+    module.lambda_get.method_id,
+    module.lambda_get.integration_id,
+    module.lambda_update.method_id,
+    module.lambda_update.integration_id,
+    module.lambda_delete.method_id,
+    module.lambda_delete.integration_id,
+  ]))
+
 }
 
 module "dynamodb" {
-  source = "./modules/database"
+  source  = "./modules/database"
+  region  = local.region
+  sns_arn = module.dashboard.sns_arn
 }
 
 /*
@@ -48,6 +70,7 @@ module "lambda_list" {
   dynamodb_arn   = module.dynamodb.table_arn
   table_name     = module.dynamodb.table_name
   region         = local.region
+  sns_arn        = module.dashboard.sns_arn
 }
 
 module "lambda_create" {
@@ -63,6 +86,7 @@ module "lambda_create" {
   dynamodb_arn   = module.dynamodb.table_arn
   table_name     = module.dynamodb.table_name
   region         = local.region
+  sns_arn        = module.dashboard.sns_arn
 }
 
 module "lambda_get" {
@@ -78,6 +102,7 @@ module "lambda_get" {
   dynamodb_arn   = module.dynamodb.table_arn
   table_name     = module.dynamodb.table_name
   region         = local.region
+  sns_arn        = module.dashboard.sns_arn
 }
 
 module "lambda_update" {
@@ -93,6 +118,7 @@ module "lambda_update" {
   dynamodb_arn   = module.dynamodb.table_arn
   table_name     = module.dynamodb.table_name
   region         = local.region
+  sns_arn        = module.dashboard.sns_arn
 }
 
 module "lambda_delete" {
@@ -108,40 +134,11 @@ module "lambda_delete" {
   dynamodb_arn   = module.dynamodb.table_arn
   table_name     = module.dynamodb.table_name
   region         = local.region
+  sns_arn        = module.dashboard.sns_arn
 }
 
-resource "aws_api_gateway_deployment" "this" {
-  rest_api_id = module.network.gw_id
+/*Put it here*/
 
-  triggers = {
-    redeployment = sha1(jsonencode([
-      module.network.list_resource_id,
-      module.network.id_resource_id,
-      module.network.options_method_id,
-      module.network.options_integration_id,
-      module.lambda_list.method_id,
-      module.lambda_list.integration_id,
-      module.lambda_create.method_id,
-      module.lambda_create.integration_id,
-      module.lambda_get.method_id,
-      module.lambda_get.integration_id,
-      module.lambda_update.method_id,
-      module.lambda_update.integration_id,
-      module.lambda_delete.method_id,
-      module.lambda_delete.integration_id,
-    ]))
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-resource "aws_api_gateway_stage" "this" {
-  deployment_id = aws_api_gateway_deployment.this.id
-  rest_api_id   = module.network.gw_id
-  stage_name    = "main"
-}
 
 /*
 VITE_FILES_BUCKET - bucket name
@@ -158,9 +155,36 @@ module "frontend" {
   env_path       = "${path.module}/packages/frontend"
   hosted_zone_id = module.network.hosted_zone_id
   gw_id          = module.network.gw_id
-  gw_url         = aws_api_gateway_stage.this.invoke_url
+  gw_url         = module.network.gateway_url
 
   depends_on = [module.network, module.dynamodb, module.lambda_create, module.lambda_delete, module.lambda_get, module.lambda_list, module.lambda_update]
+}
+
+module "dashboard" {
+  source      = "./modules/dashboard"
+  region      = local.region
+  lambda_name = module.lambda_list.function_name
+  metric_widgets = [
+    module.lambda_list.dashboard_widget_metrics,
+    module.lambda_get.dashboard_widget_metrics,
+    module.lambda_update.dashboard_widget_metrics,
+    module.lambda_delete.dashboard_widget_metrics,
+    module.lambda_create.dashboard_widget_metrics,
+    module.dynamodb.dashboard_widget,
+    module.network.dashboard_widget_metrics
+  ]
+  log_widgets = [
+    module.lambda_list.dashboard_widget_performance,
+    module.lambda_list.dashboard_widget_memory,
+    module.lambda_get.dashboard_widget_performance,
+    module.lambda_get.dashboard_widget_memory,
+    module.lambda_update.dashboard_widget_performance,
+    module.lambda_update.dashboard_widget_memory,
+    module.lambda_delete.dashboard_widget_performance,
+    module.lambda_delete.dashboard_widget_memory,
+    module.lambda_create.dashboard_widget_performance,
+    module.lambda_create.dashboard_widget_memory,
+  ]
 }
 
 output "nameservers" {
@@ -177,7 +201,7 @@ output "files_bucket" {
 
 output "gateway_url" {
   type  = string
-  value = aws_api_gateway_stage.this.invoke_url
+  value = module.network.gateway_url
 }
 
 output "identity_pool_id" {
@@ -212,3 +236,5 @@ output "lambdas_arns" {
   type  = list(string)
   value = [module.lambda_list.arn, module.lambda_create.arn, module.lambda_get.arn, module.lambda_update.arn, module.lambda_delete.arn]
 }
+
+

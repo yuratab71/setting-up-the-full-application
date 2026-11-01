@@ -2,6 +2,13 @@ terraform {
   required_version = ">= 1.15.0"
 }
 
+locals {
+  namespace             = "AWS/Lambda"
+  throttles             = "Throttles"
+  invocations           = "Invocations"
+  concurrent_executions = "ConcurrentExecutions"
+}
+
 // ==============================
 // POLICIES
 // ==============================
@@ -12,7 +19,9 @@ resource "aws_iam_role" "this" {
     Version = "2012-10-17"
     Statement = [
       {
-        Action = "sts:AssumeRole"
+        Action = [
+          "sts:AssumeRole",
+        ]
         Effect = "Allow"
         Principal = {
           Service = "lambda.amazonaws.com"
@@ -103,4 +112,43 @@ resource "aws_api_gateway_integration" "this" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = aws_lambda_function.this.invoke_arn
+}
+
+// ====================================================
+// CLOUDWATCH METRICS
+// ====================================================
+resource "aws_cloudwatch_metric_alarm" "throttling" {
+  alarm_name          = "${aws_lambda_function.this.function_name}-throttling-metric"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 1
+  metric_name         = local.throttles
+  namespace           = local.namespace
+  period              = 300
+  statistic           = "Sum"
+  threshold           = 10
+  alarm_description   = "Detects if lambda exceeds the limit of concurrent request"
+  alarm_actions       = [var.sns_arn]
+  ok_actions          = [var.sns_arn]
+}
+
+resource "aws_cloudwatch_metric_alarm" "concurrent_executions" {
+  alarm_name          = "${aws_lambda_function.this.function_name}-concurrent-executions-metric"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 1
+  metric_name         = local.concurrent_executions
+  namespace           = local.namespace
+  period              = 300
+  statistic           = "Sum"
+  threshold           = 1 // INFO: for this little project for now will be file
+  alarm_description   = "Concurrent executions of lambda functions"
+  alarm_actions       = [var.sns_arn]
+  ok_actions          = [var.sns_arn]
+}
+
+// ====================================================
+// CLOUDWATCH LOG GROUP
+// ====================================================
+resource "aws_cloudwatch_log_group" "this" {
+  name              = "/aws/lambda/${aws_lambda_function.this.function_name}"
+  retention_in_days = 7
 }

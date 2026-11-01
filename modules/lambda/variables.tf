@@ -52,3 +52,8 @@ variable "region" {
   description = "Region!"
   type        = string
 }
+
+variable "sns_arn" {
+  description = "SNS topic arn"
+  type        = string
+}
